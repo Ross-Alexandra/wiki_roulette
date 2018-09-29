@@ -1,11 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from time import sleep
 import random
 import argparse
 
 class WikiScraper(object):
     def __init__(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome("C:\\Users\\Ross\\Downloads\\chromedriver_win32\\chromedriver.exe")
 
     def scrape(self, core = "Apple"):
         url = "https://en.wikipedia.org/wiki/{}".format(core.replace(' ', '_'))
@@ -19,26 +20,28 @@ class WikiScraper(object):
 
         body = self.driver.find_element_by_id("bodyContent")
         hrefs = body.find_elements_by_xpath("//a[@href]")
-        links = []
-        for href in hrefs:
-            link = href.get_attribute("href")
-            if "https://en.wikipedia.org/wiki" in link and\
-                "talk" not in link.lower() and\
-                "main" not in link.lower() and\
-                ":" not in link[9:] and\
-                "?" not in link and\
-                "#" not in link:
-   
-                 links.append(link)
+        num_articles = len(hrefs)
 
-        article = random.choice(links)
-        return article.replace("https://en.wikipedia.org/wiki/", "")
+        link = hrefs[random.randint(0, num_articles)].get_attribute("href")
+		
+        while not ("https://en.wikipedia.org/wiki" in link and\
+                   "talk" not in link.lower() and\
+                   "main" not in link.lower() and\
+                   ":" not in link[9:] and\
+                   "?" not in link and\
+                   "#" not in link):
+   
+                   link = hrefs[random.randint(0, num_articles)].get_attribute("href")
+
+        return link.replace("https://en.wikipedia.org/wiki/", "")
 
 def main():
    
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--article", help="The base article", default="Apple")
     parser.add_argument("-i", "--iterations", help="The number of articles to parse", default=3)
+    parser.add_argument("-d", "--delay", help="The number of seconds to wait before"
+                                              "opening another article", type=float, default=0)	
 
     args = parser.parse_args()
 
@@ -54,6 +57,7 @@ def main():
             file.write(next_article + "\n")
 
         next_article = scraper.scrape(next_article)
+        sleep(args.delay)
 
     input("Please press enter when you're done reading your article")
     print("The steps required to get here are contained in wikis.txt")

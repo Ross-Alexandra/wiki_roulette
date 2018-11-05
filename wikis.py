@@ -6,7 +6,7 @@ import argparse
 
 class WikiScraper(object):
     def __init__(self):
-        self.driver = webdriver.Chrome("C:\\Users\\Ross\\Downloads\\chromedriver_win32\\chromedriver.exe")
+        self.driver = webdriver.Chrome()
 
     def scrape(self, core = "Apple"):
         url = "https://en.wikipedia.org/wiki/{}".format(core.replace(' ', '_'))
